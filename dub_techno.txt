@@ -1,0 +1,251 @@
+// ==============================================
+// PORTRAIT OF TRACY - DUB TECHNO PROGRESSION
+// ==============================================
+// Progresión: | Em7 | Amaj7(#11) | Em11 | Bm7 |
+// Implementación completa con bajo, kick y acordes atmosféricos
+// ==============================================
+
+// Configuración: 125 BPM (tempo dub techno)
+setcps(125/60/4)
+
+// ==============================================
+// I. FUNDAMENTO RÍTMICO
+// ==============================================
+
+// KICK - Profundo y con peso
+let kick = sound("bd:5")
+  .speed(0.85)
+  .shape(0.4)
+  .lpf(sine.range(80, 110).slow(16))  // Modulación sutil del filtro
+  .gain(0.85)
+  .room(0.05)
+  .struct("x ~ ~ ~ x ~ ~ ~")
+
+// HI-HATS - Sutiles, a contratiempo
+let hats = sound("hh:3")
+  .struct("~ x ~ x ~ x ~ [x ~]")
+  .gain(0.25)
+  .lpf(perlin.range(1500, 2500).slow(12))
+  .pan(sine.range(-0.3, 0.3).slow(7))
+  .delay(0.125).delaytime(0.25).delayfeedback(0.2)
+  .sometimes(x => x.speed(rand.range(0.9, 1.05)))
+
+// ==============================================
+// II. BAJO - SIGUIENDO LA PROGRESIÓN
+// ==============================================
+
+// SUB BASS - Pedal en Em (constante)
+let subBass = note("e1")
+  .sound("sine")
+  .gain(0.7)
+  .shape(0.2)
+  .lpf(150)
+  .struct("x ~ ~ ~ x ~ ~ ~")
+
+// BAJO MELÓDICO - Sigue las fundamentales
+let bassLine = note("<e2 a2 e2 b2>/4")  // Cambia cada 4 ciclos (1 compás)
+  .sound("sawtooth")
+  .lpf(perlin.range(250, 600).slow(16))
+  .resonance(0.25)
+  .attack(0.02).decay(0.3).sustain(0.6).release(0.8)
+  .gain(0.5)
+  .shape(0.15)
+  .struct("x ~ x ~ ~ x ~ ~")
+
+// ==============================================
+// III. ACORDES ATMOSFÉRICOS - LA PROGRESIÓN COMPLETA
+// ==============================================
+
+// VERSIÓN 1: Usando note() con las notas específicas
+let chordsDetailed = note("<[e2,g2,b2,d3] [a2,c#3,e3,g#3,b3] [e2,g2,b2,d3,f#3,a3] [b1,d2,f#2,a2]>/4")
+  .sound("supersaw")
+  .attack(2).decay(1).sustain(0.5).release(4)
+  .lpf(sine.range(400, 1000).slow(32))
+  .resonance(0.15)
+  .gain(0.25)
+  .room(0.7).size(0.9)
+  .delay(0.5).delaytime(0.75).delayfeedback(0.6)
+  .pan(sine.range(-0.5, 0.5).slow(24))
+
+// VERSIÓN 2: Usando chord() - Más simple y elegante
+let chordsSimple = chord("<Em7 Amaj7#11 Em11 Bm7>/4")
+  .voicing()  // Inversiones automáticas para fluidez
+  .sound("supersquare")
+  .attack(1.5).decay(0.5).sustain(0.4).release(3)
+  .lpf(sine.range(500, 1200).slow(28))
+  .resonance(0.2)
+  .gain(0.3)
+  .room(0.8).size(0.9)
+  .delay(0.5).delaytime(0.75).delayfeedback(0.65)
+  .pan(sine.range(-0.6, 0.6).slow(20))
+
+// ==============================================
+// IV. PAD ESPECIAL - Amaj7(#11) DESTACADO
+// ==============================================
+// El Amaj7(#11) con tratamiento especial para contraste
+
+let brightPad = chord("Amaj7#11")
+  .voicing()
+  .sound("sawtooth")
+  .struct("~ x ~ ~ ~ ~ ~ ~".slow(16))  // Aparece ocasionalmente
+  .attack(3).release(5)
+  .lpf(2000).hpf(200)
+  .gain(0.2)
+  .room(0.95).size(0.98)  // Mucha más reverb
+  .delay(0.75).delaytime(1.5).delayfeedback(0.7)
+  .pan(0)
+
+// ==============================================
+// V. ELEMENTOS DE TEXTURA DUB
+// ==============================================
+
+// CHOPS ESTILO DUB - Cortes rítmicos de los acordes
+let dubChops = chord("<Em7 Amaj7#11 Em11 Bm7>/4")
+  .sound("supersquare")
+  .chop(4)  // Corta en 4 partes - efecto dub clásico
+  .lpf(600)
+  .gain(0.15)
+  .delay(0.25).delayfeedback(0.4)
+  .room(0.5)
+  .sometimes(x => x.reverse())  // Ocasionalmente reversa
+  .pan(rand.range(-0.7, 0.7))
+
+// TEXTURA AMBIENTAL
+let ambientLayer = n("0*32")
+  .sound("noise")
+  .lpf(perlin.range(200, 500).slow(64))
+  .hpf(100)
+  .gain(0.03)
+  .room(0.9).size(0.95)
+
+// DUB DELAYS - Procesamiento adicional
+let dubProcessing = stack(bassLine, chordsSimple)
+  .sometimes(x => x
+    .delay(0.666)
+    .delaytime(perlin.range(0.5, 1.5).slow(32))
+    .delayfeedback(0.75)
+    .lpf(sine.range(300, 800).slow(16))
+    .gain(0.15)
+  )
+
+// ==============================================
+// VI. COMPOSICIONES - DIFERENTES INTENSIDADES
+// ==============================================
+
+// OPCIÓN 1: MINIMAL (Solo progresión básica)
+
+stack(
+  kick,
+  bassLine,
+  chord("<Em7 Amaj7#11>/2")  // Solo 2 acordes alternando
+    .slow(2)
+    .sound("supersaw")
+    .attack(3).release(6)
+    .lpf(sine.range(300, 1200).slow(32))
+    .gain(0.25)
+    .room(0.8).size(0.9)
+    .delay(0.375).delaytime(0.75).delayfeedback(0.6)
+).compress(4, -10).gain(0.85)
+
+
+// OPCIÓN 2: MEDIA (Progresión completa con bajo)
+/*
+stack(
+  kick,
+  subBass,
+  bassLine,
+  chordsSimple,
+  hats.gain(0.2)
+).compress(4, -10).gain(0.85)
+*/
+
+/* OPCIÓN 3: COMPLETA (Todas las capas)
+stack(
+  // Ritmo
+  kick,
+  hats,
+  
+  // Bajo
+  subBass,
+  bassLine,
+  
+  // Acordes
+  chordsSimple,  // Usa chordsDetailed como alternativa
+  brightPad.sometimes(x => x.silence()),  // Amaj7#11 especial
+  dubChops.often(x => x.silence()),  // Chops ocasionales
+  
+  // Textura
+  ambientLayer,
+  dubProcessing.gain(0.2)
+)
+.compress(4, -10)
+.gain(0.85)
+*/
+// ==============================================
+// VII. VARIACIONES PARA LIVE CODING
+// ==============================================
+
+/*
+// A. PROGRESIÓN ALTERNATIVA - Más oscura
+chord("<Em7 Gmaj7 Am11 Em7>/4")
+
+// B. PROGRESIÓN EXTENDIDA - 8 compases
+chord("<Em7 Em7 Amaj7#11 Amaj7#11 Em11 Em11 Bm7 Gmaj7>/4")
+
+// C. SOLO DOS ACORDES - Hipnótico
+chord("<Em7 Amaj7#11>/2").slow(2)
+
+// D. MODULACIÓN DEL Amaj7#11 - Destacarlo más
+.whenmod(16, 4, x => x  // Cada 16 ciclos, durante 4
+  .lpf(3000)
+  .gain(0.4)
+  .room(0.95)
+)
+
+// E. FILTRO "UNDERWATER" EXTREMO
+chordsSimple
+  .lpf(300)
+  .resonance(0.5)
+  .shape(0.4)
+  .room(0.8)
+
+// F. ACORDES CON SIDE-CHAIN (Simulado)
+chordsSimple.gain("[0.15 0.3]*4")  // Baja con el kick
+
+// G. VARIACIÓN RÍTMICA DE CHOPS
+dubChops.chop(8)  // Más cortes
+dubChops.chop(2)  // Menos cortes
+dubChops.struct(euclid(5, 8))  // Patrón euclidiano
+
+// H. AUTOMATIZACIÓN PROGRESIVA
+chordsSimple.gain(saw.range(0.1, 0.4).slow(32))  // Fade in lento
+
+// I. ACORDES CON GLITCH
+chordsSimple.sometimes(x => x.speed(2).gain(0.2))
+
+// J. BREAKDOWN - Solo acordes y reverb
+// Comenta todo excepto chordsSimple y ambientLayer
+*/
+
+// ==============================================
+// NOTAS DE PRODUCCIÓN
+// ==============================================
+// 1. La progresión Em7-Amaj7#11-Em11-Bm7 crea el arco emocional
+// 2. El Em como pedal mantiene el centro tonal oscuro
+// 3. El Amaj7#11 debe destacar - es el momento brillante
+// 4. Los chops añaden el elemento rítmico dub clásico
+// 5. Usa .chop(4) para el efecto de "cortes" estilo dub
+// 6. El delay largo (0.75) con feedback alto crea espacio infinito
+// 7. Modula los filtros lentamente para evolución continua
+// 8. El Bm7 actúa como puente suave de vuelta al Em7
+
+// ==============================================
+// TIPS PARA PERFORMANCE
+// ==============================================
+// • Empieza con OPCIÓN 1 (minimal) y ve añadiendo elementos
+// • En el compás del Amaj7#11, abre el filtro para máximo impacto
+// • Usa los dubChops en momentos clave para energía
+// • Silencia el kick ocasionalmente para crear tensión
+// • Experimenta con diferentes valores de .chop() en vivo
+// • El brightPad funciona mejor cuando aparece esporádicamente
+// • Para breakdowns, deja solo acordes + reverb
