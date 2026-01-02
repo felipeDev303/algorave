@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Mercury Form</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script>
+    var balls = [];
+    var threshold = 1.0;
+    var resolution = 4;
+    var initialized = false;
+    
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      pixelDensity(1);
+      
+      var b1 = {};
+      b1.x = width/2;
+      b1.y = height/2;
+      b1.r = 80;
+      b1.vx = 0.3;
+      b1.vy = 0.5;
+      balls.push(b1);
+      
+      var b2 = {};
+      b2.x = width/2 + 100;
+      b2.y = height/2;
+      b2.r = 60;
+      b2.vx = -0.4;
+      b2.vy = 0.3;
+      balls.push(b2);
+      
+      var b3 = {};
+      b3.x = width/2 - 80;
+      b3.y = height/2 + 50;
+      b3.r = 70;
+      b3.vx = 0.5;
+      b3.vy = -0.4;
+      balls.push(b3);
+      
+      var b4 = {};
+      b4.x = width/2 + 50;
+      b4.y = height/2 - 60;
+      b4.r = 50;
+      b4.vx = -0.3;
+      b4.vy = 0.6;
+      balls.push(b4);
+    }
+    
+    function draw() {
+      background(10, 10, 15);
+      
+      var i = 0;
+      var ball;
+      
+      for (i = 0; i < balls.length; i++) {
+        ball = balls[i];
+        ball.x = ball.x + ball.vx;
+        ball.y = ball.y + ball.vy;
+        
+        if (ball.x < ball.r || ball.x > width - ball.r) {
+          ball.vx = ball.vx * -1;
+        }
+        if (ball.y < ball.r || ball.y > height - ball.r) {
+          ball.vy = ball.vy * -1;
+        }
+        
+        ball.x = constrain(ball.x, ball.r, width - ball.r);
+        ball.y = constrain(ball.y, ball.r, height - ball.r);
+      }
+      
+      loadPixels();
+      
+      var y = 0;
+      var x = 0;
+      var sum = 0;
+      var dx = 0;
+      var dy = 0;
+      var dist = 0;
+      var py = 0;
+      var px = 0;
+      var idx = 0;
+      
+      for (y = 0; y < height; y = y + resolution) {
+        for (x = 0; x < width; x = x + resolution) {
+          sum = 0;
+          
+          for (i = 0; i < balls.length; i++) {
+            ball = balls[i];
+            dx = x - ball.x;
+            dy = y - ball.y;
+            dist = sqrt(dx * dx + dy * dy);
+            
+            if (dist > 0) {
+              sum = sum + ((ball.r * ball.r) / (dist * dist));
+            }
+          }
+          
+          if (sum >= threshold) {
+            for (py = 0; py < resolution; py++) {
+              for (px = 0; px < resolution; px++) {
+                if (y + py < height && x + px < width) {
+                  idx = ((y + py) * width + (x + px)) * 4;
+                  pixels[idx] = 192;
+                  pixels[idx + 1] = 192;
+                  pixels[idx + 2] = 192;
+                  pixels[idx + 3] = 255;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      updatePixels();
+      filter(BLUR, 2);
+    }
+    
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
+</body>
+</html>
