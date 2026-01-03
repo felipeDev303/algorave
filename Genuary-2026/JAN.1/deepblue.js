@@ -1,43 +1,47 @@
-// ================================
-// Genuary | JAN 1 | DEEP BLUE
-// ================================
-
-await initHydra();
+await initHydra()
 
 // ================================
-// TEMPO GLOBAL
-// ================================
-setcps(0.8);
-
-// ================================
-// VISUAL
+// VISUAL — DEEP BLUE
 // ================================
 
-// Campo base (materia)
-noise(1.2, 0.03)
-  // Segundo campo = metaballs falsas
-  .add(noise(1.5, 0.02).scrollX(0.01).scrollY(-0.008))
 
-  // UMBRAL VIVO
-  // Oscila lentamente siguiendo el tiempo global (cps)
-  .thresh(
-    sine.range(0.42, 0.48).slow(16) // ← respiración larga
+shape(100, 0.1, 0.5)
+  .modulateScale(
+    noise(9, 0.08), 
+    () => 0.35 + Math.sin(time * 0.25) * 0.15
+  )
+  .modulateScale(
+    noise(9, 0.5)
+      .rotate(() => time * 0.05), 
+    0.25
+  )
+  .modulate(
+    noise(9, 0.04),
+    () => 0.08 + Math.sin(time * 0.3) * 0.04
   )
 
-  // Suavizado
-  .contrast(2)
+  .color(0.02, 0.2, 0.7)
+  .saturate(2.5)
+  .contrast(2.2)
+  .brightness(-0.05)
 
-  // Color único — Deep Blue
-  .color(0, 0.15, 0.6)
-  .brightness(-0.12)
+  .scrollX(() => Math.sin(time * 0.08) * 0.06 + Math.cos(time * 0.15) * 0.03)
+  .scrollY(() => Math.cos(time * 0.06) * 0.05 + Math.sin(time * 0.12) * 0.02)
+  .rotate(() => Math.sin(time * 0.04) * 0.1)
+  // Respiración celular orgánica
+  .scale(() => 1 + Math.sin(time * 0.18) * 0.12 + Math.cos(time * 0.25) * 0.06)
 
-  // erosión
-  .modulateScrollY(o0, sine.range(-0.002, 0.002).slow(32))
-
-  // Cada tanto el movimiento se detiene
-  .modulate(noise(0.5), sine.range(0, 0.02).slow(64))
-
-  .out(o0);
+  .add(
+    shape(100, 0.18, 0.05)
+      .modulateScale(noise(1.5, 0.08), () => 0.35 + Math.sin(time * 0.25) * 0.15)
+      .color(0.1, 0.3, 0.5)
+      .brightness(-0.3)
+      .scrollX(() => Math.sin(time * 0.08) * 0.06 + Math.cos(time * 0.15) * 0.03)
+      .scrollY(() => Math.cos(time * 0.06) * 0.05 + Math.sin(time * 0.12) * 0.02)
+      .scale(() => 1 + Math.sin(time * 0.18) * 0.12 + Math.cos(time * 0.25) * 0.06),
+    0.4
+  )
+  .out(o0)
 
 // ================================
 // AUDIO — STRINGS
@@ -47,13 +51,12 @@ $: chord("<Cm9 AbM7 EbM7 Cm9 AbM7 Fm7 Gm>/8")
   .voicing()
   .release(0.6)
   .gain(0.1)
-  .room(0.5);
+  .room(0.5)
 
 // ================================
 // AUDIO — HARP
 // ================================
-$: note(`
-<
+$: note(`<
   [d4 eb4 bb3 g3]!7
   [~ ~ ~ ~]
   [c4 bb3 eb3 f3]
@@ -64,24 +67,27 @@ $: note(`
   [ab3 g3 eb3 c3]
   [~ ~ ~ ~]
   [~ ~ ~ ~]
->
-`)
+>`)
   .s("gm_orchestral_harp")
   .delay(0.5)
   .room(0.8)
   .size(4)
   .decay(0.9)
   .sustain(0)
-  .gain(0.2);
+  .gain(0.2)
 
 // ================================
 // AUDIO — LEAD
 // ================================
-$: note("<c4 eb4>/16").s("gm_lead_2_sawtooth").gain(0.05);
+$: note("<c5 eb5>/16")
+  .s("gm_lead_7_fifths")
+  .gain(0.05)
 
 // ================================
 // AUDIO — HARMONICA
 // ================================
-$: note("<c3 ab2>/8").s("gm_harmonica").gain(0.05);
+$: note("<c3 ab2>/8")
+  .s("gm_harmonica")
+  .gain(0.05)
 
 // hush()
