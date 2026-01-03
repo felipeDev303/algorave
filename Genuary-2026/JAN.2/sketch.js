@@ -9,6 +9,7 @@ const COLS = 3;
 const ROWS = 4;
 let cellWidth, cellHeight;
 let padding = 8;
+const headerHeight = 50;
 
 // Follow Through variables for principle 5
 let followX = 0,
@@ -23,18 +24,18 @@ let particles = [];
 
 // Principles data
 const principles = [
-  { num: "①", name: "SQUASH & STRETCH", short: "Peso y flexibilidad" },
-  { num: "②", name: "ANTICIPATION", short: "Preparar la acción" },
-  { num: "③", name: "STAGING", short: "Dirigir atención" },
-  { num: "④", name: "STRAIGHT AHEAD", short: "Animación libre" },
-  { num: "⑤", name: "FOLLOW THROUGH", short: "Continuidad" },
-  { num: "⑥", name: "SLOW IN/OUT", short: "Easing" },
-  { num: "⑦", name: "ARCS", short: "Trayectorias curvas" },
-  { num: "⑧", name: "SECONDARY ACTION", short: "Acciones secundarias" },
-  { num: "⑨", name: "TIMING", short: "Velocidad y ritmo" },
-  { num: "⑩", name: "EXAGGERATION", short: "Exageración" },
-  { num: "⑪", name: "SOLID DRAWING", short: "Volumen y peso" },
-  { num: "⑫", name: "APPEAL", short: "Carisma" },
+  { num: "01", name: "SQUASH & STRETCH", short: "Deformación" },
+  { num: "02", name: "ANTICIPATION", short: "Preparación" },
+  { num: "03", name: "STAGING", short: "Puesta en escena" },
+  { num: "04", name: "STRAIGHT AHEAD", short: "Cuadro a cuadro" },
+  { num: "05", name: "FOLLOW THROUGH", short: "Inercia" },
+  { num: "06", name: "SLOW IN/OUT", short: "Aceleración" },
+  { num: "07", name: "ARCS", short: "Trayectorias" },
+  { num: "08", name: "SECONDARY ACTION", short: "Acción secundaria" },
+  { num: "09", name: "TIMING", short: "Ritmo" },
+  { num: "10", name: "EXAGGERATION", short: "Exageración" },
+  { num: "11", name: "SOLID DRAWING", short: "Volumen 3D" },
+  { num: "12", name: "APPEAL", short: "Atractivo" },
 ];
 
 function setup() {
@@ -42,7 +43,7 @@ function setup() {
   pixelDensity(1);
 
   cellWidth = width / COLS;
-  cellHeight = height / ROWS;
+  cellHeight = (height - headerHeight) / ROWS;
 
   // Initialize follow through positions
   followX = cellWidth / 2;
@@ -102,31 +103,38 @@ function easeInBack(t) {
 
 function drawCellFrame(col, row, principleIndex) {
   const x = col * cellWidth;
-  const y = row * cellHeight;
+  const y = row * cellHeight + headerHeight;
   const p = principles[principleIndex];
   const phase = frame * 0.01 + principleIndex * 0.5;
   const col_color = getColor(phase, 1.0);
 
   push();
   // Border
-  stroke(col_color.r, col_color.g, col_color.b, 100);
+  stroke(col_color.r, col_color.g, col_color.b, 80);
   strokeWeight(1);
   noFill();
-  rect(x + 2, y + 2, cellWidth - 4, cellHeight - 4);
+  rect(x + 3, y + 3, cellWidth - 6, cellHeight - 6);
 
-  // Title
-  setGlow(col_color, 10);
-  fill(col_color.r, col_color.g, col_color.b, 255);
+  // Número grande arriba izquierda
+  setGlow(col_color, 8);
+  fill(col_color.r, col_color.g, col_color.b, 60);
   noStroke();
   textFont("monospace");
-  textSize(11);
+  textSize(28);
   textAlign(LEFT, TOP);
-  text(p.num + " " + p.name, x + 10, y + 10);
+  text(p.num, x + 8, y + 6);
 
-  // Subtitle
-  fill(col_color.r * 0.8, col_color.g * 0.8, col_color.b, 200);
-  textSize(9);
-  text(p.short, x + 10, y + 25);
+  // Nombre del principio
+  setGlow(col_color, 12);
+  fill(col_color.r, col_color.g, col_color.b, 255);
+  textSize(10);
+  textAlign(LEFT, BOTTOM);
+  text(p.name, x + 10, y + cellHeight - 18);
+
+  // Subtítulo
+  fill(col_color.r, col_color.g * 0.7, col_color.b, 150);
+  textSize(8);
+  text(p.short, x + 10, y + cellHeight - 8);
   pop();
 }
 
@@ -310,35 +318,96 @@ function drawStraightAhead(cx, cy) {
   const phase = frame * 0.01 + 3;
   const col = getColor(phase);
 
-  // Organic, unpredictable motion (like fire/smoke)
+  // Labels
   push();
-  setGlow(col, 10);
-  stroke(col.r, col.g, col.b, 180);
-  strokeWeight(1.5);
+  fill(col.r, col.g, col.b, 100);
+  textSize(7);
+  textAlign(CENTER, TOP);
+  text("POSE TO POSE", cx - 50, cy + 60);
+  text("STRAIGHT AHEAD", cx + 50, cy + 60);
+  pop();
+
+  // === LEFT: POSE TO POSE (CUADRADO) ===
+  // Rotación controlada entre poses clave definidas
+  const cycleT = (frame % 180) / 180;
+  let rotation;
+
+  // 3 poses clave: 0° -> 45° -> 90° -> 45° -> 0°
+  if (cycleT < 0.25) {
+    const t = easeInOut(cycleT / 0.25);
+    rotation = t * (PI / 4); // 0° a 45°
+  } else if (cycleT < 0.5) {
+    const t = easeInOut((cycleT - 0.25) / 0.25);
+    rotation = PI / 4 + t * (PI / 4); // 45° a 90°
+  } else if (cycleT < 0.75) {
+    const t = easeInOut((cycleT - 0.5) / 0.25);
+    rotation = PI / 2 - t * (PI / 4); // 90° a 45°
+  } else {
+    const t = easeInOut((cycleT - 0.75) / 0.25);
+    rotation = PI / 4 - t * (PI / 4); // 45° a 0°
+  }
+
+  // Marcadores de keyframes (poses clave)
+  push();
+  stroke(col.r, col.g * 0.3, col.b, 50);
+  strokeWeight(1);
+  noFill();
+  // Pose 1: 0°
+  push();
+  translate(cx - 50, cy);
+  rectMode(CENTER);
+  rect(0, 0, 18, 18);
+  pop();
+  // Pose 2: 45°
+  push();
+  translate(cx - 50, cy);
+  rotate(PI / 4);
+  rect(0, 0, 18, 18);
+  pop();
+  // Pose 3: 90°
+  push();
+  translate(cx - 50, cy);
+  rotate(PI / 2);
+  rect(0, 0, 18, 18);
+  pop();
+  pop();
+
+  // Cuadrado pose to pose (controlado, poses definidas)
+  push();
+  translate(cx - 50, cy);
+  rotate(rotation);
+  setGlow(col, 15);
+  stroke(col.r, col.g, col.b);
+  strokeWeight(2);
+  noFill();
+  rectMode(CENTER);
+  rect(0, 0, 30, 30);
+  pop();
+
+  // === RIGHT: STRAIGHT AHEAD (LLAMA/FUEGO) ===
+  // Movimiento orgánico frame a frame, sin poses predefinidas
+  push();
+  setGlow(col, 15);
+  stroke(col.r, col.g, col.b);
+  strokeWeight(2);
   noFill();
 
+  // Llama ondulante - se construye frame a frame
   beginShape();
-  for (let i = 0; i < 20; i++) {
-    const t = i / 20;
-    const noiseVal = noise(i * 0.3, frame * 0.02);
-    const x = cx - 60 + i * 6 + (noiseVal - 0.5) * 30;
-    const y =
-      cy +
-      sin(t * PI * 2 + frame * 0.1) * 30 +
-      (noise(i * 0.5, frame * 0.03) - 0.5) * 40;
-    vertex(x, y);
+  for (let i = 0; i < 15; i++) {
+    const t = i / 14;
+    // Base más ancha, punta más estrecha (forma de llama)
+    const width = 25 * (1 - t * 0.8);
+    const waveX = cx + 50 + sin(t * PI * 3 + frame * 0.12) * width;
+    const waveY = cy + 50 - t * 100;
+    // Noise para movimiento impredecible frame a frame
+    const noiseX = (noise(i * 0.4, frame * 0.04) - 0.5) * 20 * (1 - t * 0.5);
+    const noiseY = (noise(i * 0.4 + 100, frame * 0.05) - 0.5) * 12;
+
+    curveVertex(waveX + noiseX, waveY + noiseY);
   }
   endShape();
 
-  // Random particles
-  for (let i = 0; i < 5; i++) {
-    const px = cx + (noise(i, frame * 0.02) - 0.5) * 100;
-    const py = cy + (noise(i + 10, frame * 0.02) - 0.5) * 80;
-    const size = 3 + noise(i, frame * 0.05) * 5;
-    fill(col.r, col.g, col.b, 100);
-    noStroke();
-    circle(px, py, size);
-  }
   pop();
 }
 
@@ -392,47 +461,74 @@ function drawSlowInOut(cx, cy) {
   const phase = frame * 0.01 + 5;
   const col = getColor(phase);
 
-  // Compare linear vs eased motion
-  const cycleT = (frame % 150) / 150;
-  const linear = cycleT;
-  const eased = easeInOut(cycleT);
+  // Ciclo de ida y vuelta con easing
+  const cycleT = (frame % 180) / 180;
+  // Ida (0-0.5) y vuelta (0.5-1)
+  let t;
+  if (cycleT < 0.5) {
+    t = easeInOut(cycleT * 2); // 0 -> 1
+  } else {
+    t = easeInOut((1 - cycleT) * 2); // 1 -> 0
+  }
 
-  const startX = cx - 70;
-  const endX = cx + 70;
+  const startX = cx - 80;
+  const endX = cx + 80;
 
-  // Track
+  // Track principal
   push();
-  stroke(col.r, col.g, col.b, 30);
+  stroke(col.r, col.g, col.b, 40);
   strokeWeight(1);
-  line(startX, cy - 20, endX, cy - 20);
-  line(startX, cy + 20, endX, cy + 20);
+  line(startX, cy, endX, cy);
 
-  // Labels
-  fill(col.r, col.g, col.b, 100);
-  textSize(7);
-  textAlign(RIGHT, CENTER);
-  text("LINEAR", startX - 5, cy - 20);
-  text("EASED", startX - 5, cy + 20);
+  // Marcadores de inicio y fin
+  stroke(col.r, col.g * 0.5, col.b, 80);
+  line(startX, cy - 15, startX, cy + 15);
+  line(endX, cy - 15, endX, cy + 15);
   pop();
 
-  // Linear ball
+  // Visualización de espaciado (dots mostrando distribución de frames)
   push();
-  setGlow(col, 8);
-  stroke(col.r, col.g * 0.6, col.b, 150);
-  strokeWeight(1.5);
-  noFill();
-  const linearX = startX + linear * (endX - startX);
-  circle(linearX, cy - 20, 16);
+  fill(col.r, col.g * 0.4, col.b, 60);
+  noStroke();
+  for (let i = 0; i <= 10; i++) {
+    const dotT = easeInOut(i / 10);
+    const dotX = startX + dotT * (endX - startX);
+    circle(dotX, cy + 25, 4);
+  }
+  // Label
+  fill(col.r, col.g, col.b, 80);
+  textSize(6);
+  textAlign(CENTER, TOP);
+  text("FRAME SPACING", cx, cy + 35);
   pop();
 
-  // Eased ball
+  // Círculo principal con easing
+  const ballX = startX + t * (endX - startX);
+
   push();
-  setGlow(col, 15);
+  setGlow(col, 18);
   stroke(col.r, col.g, col.b);
   strokeWeight(2);
   noFill();
-  const easedX = startX + eased * (endX - startX);
-  circle(easedX, cy + 20, 20);
+  circle(ballX, cy, 28);
+  pop();
+
+  // Trail que muestra la velocidad (más juntos = más lento)
+  push();
+  for (let i = 1; i <= 5; i++) {
+    const trailCycleT = ((frame - i * 3) % 180) / 180;
+    let trailT;
+    if (trailCycleT < 0.5) {
+      trailT = easeInOut(trailCycleT * 2);
+    } else {
+      trailT = easeInOut((1 - trailCycleT) * 2);
+    }
+    const trailX = startX + trailT * (endX - startX);
+    stroke(col.r, col.g, col.b, 80 - i * 15);
+    strokeWeight(1);
+    noFill();
+    circle(trailX, cy, 20 - i * 2);
+  }
   pop();
 }
 
@@ -440,43 +536,64 @@ function drawArcs(cx, cy) {
   const phase = frame * 0.01 + 6;
   const col = getColor(phase);
 
-  // Arc path
-  const arcT = (frame % 180) / 180;
-  const angle = arcT * PI * 2;
+  // Péndulo - demuestra arcos naturales por rotación
+  const pivotY = cy - 60;
+  const armLength = 90;
+  const maxSwing = PI / 3; // 60 grados
 
-  // Elliptical orbit
-  const orbitW = 80;
-  const orbitH = 40;
+  // Oscilación con easing natural (simula física)
+  const swingT = (frame % 180) / 180;
+  const pendulumAngle = sin(swingT * PI * 2) * maxSwing;
+
+  // Posición de la bola
+  const ballX = cx + sin(pendulumAngle) * armLength;
+  const ballY = pivotY + cos(pendulumAngle) * armLength;
 
   push();
-  // Orbit path
-  stroke(col.r, col.g, col.b, 40);
+
+  // Arco de trayectoria (guía visual)
+  stroke(col.r, col.g, col.b, 30);
   strokeWeight(1);
   drawingContext.setLineDash([3, 3]);
   noFill();
-  ellipse(cx, cy, orbitW * 2, orbitH * 2);
+  arc(
+    cx,
+    pivotY,
+    armLength * 2,
+    armLength * 2,
+    PI / 2 - maxSwing,
+    PI / 2 + maxSwing
+  );
   drawingContext.setLineDash([]);
 
-  // Moving object on arc
-  const ballX = cx + cos(angle) * orbitW;
-  const ballY = cy + sin(angle) * orbitH;
+  // Punto de pivote
+  fill(col.r, col.g, col.b, 150);
+  noStroke();
+  circle(cx, pivotY, 8);
 
-  // Trail
+  // Brazo del péndulo
+  stroke(col.r, col.g, col.b, 120);
+  strokeWeight(1.5);
+  line(cx, pivotY, ballX, ballY);
+
+  // Trail de posiciones anteriores
   for (let i = 5; i > 0; i--) {
-    const trailAngle = angle - i * 0.2;
-    const tx = cx + cos(trailAngle) * orbitW;
-    const ty = cy + sin(trailAngle) * orbitH;
-    stroke(col.r, col.g, col.b, 30 - i * 5);
+    const trailT = ((frame - i * 4) % 180) / 180;
+    const trailAngle = sin(trailT * PI * 2) * maxSwing;
+    const tx = cx + sin(trailAngle) * armLength;
+    const ty = pivotY + cos(trailAngle) * armLength;
+    stroke(col.r, col.g, col.b, 40 - i * 7);
     strokeWeight(1);
     noFill();
-    circle(tx, ty, 12 - i * 1.5);
+    circle(tx, ty, 14 - i * 2);
   }
 
-  // Main ball
-  setGlow(col, 15);
+  // Bola principal
+  setGlow(col, 18);
   stroke(col.r, col.g, col.b);
   strokeWeight(2);
-  circle(ballX, ballY, 18);
+  noFill();
+  circle(ballX, ballY, 22);
   pop();
 }
 
@@ -535,36 +652,75 @@ function drawTiming(cx, cy) {
   const phase = frame * 0.01 + 8;
   const col = getColor(phase);
 
-  // Three balls with different timing
-  const speeds = [0.02, 0.05, 0.12];
-  const labels = ["SLOW", "MED", "FAST"];
-  const yOffsets = [-35, 0, 35];
+  const startX = cx - 70;
+  const endX = cx + 70;
+  const trackLength = endX - startX;
+
+  // === FAST: Pocos cuadros (5), espaciado amplio ===
+  const fastY = cy - 35;
+  const fastFrames = 5;
+  const fastCycle = 60; // ciclo rápido
+  const fastT = (frame % fastCycle) / fastCycle;
+  const fastStep = Math.floor(fastT * fastFrames) / (fastFrames - 1);
+  const fastX = startX + fastStep * trackLength;
+
+  // === SLOW: Muchos cuadros (12), espaciado estrecho ===
+  const slowY = cy + 35;
+  const slowFrames = 12;
+  const slowCycle = 180; // ciclo lento
+  const slowT = (frame % slowCycle) / slowCycle;
+  const slowStep = Math.floor(slowT * slowFrames) / (slowFrames - 1);
+  const slowX = startX + slowStep * trackLength;
 
   push();
-  for (let i = 0; i < 3; i++) {
-    const t = (frame * speeds[i]) % 1;
-    const eased = easeInOut(t);
-    const x = cx - 60 + eased * 120;
 
-    // Track
-    stroke(col.r, col.g, col.b, 30);
-    strokeWeight(1);
-    line(cx - 60, cy + yOffsets[i], cx + 60, cy + yOffsets[i]);
+  // Labels
+  fill(col.r, col.g, col.b, 100);
+  textSize(7);
+  textAlign(RIGHT, CENTER);
+  text("FAST (5)", startX - 5, fastY);
+  text("SLOW (12)", startX - 5, slowY);
 
-    // Label
-    fill(col.r, col.g, col.b, 80);
-    textSize(7);
-    textAlign(RIGHT, CENTER);
-    text(labels[i], cx - 65, cy + yOffsets[i]);
+  // === FAST track con espaciado visible ===
+  stroke(col.r, col.g, col.b, 30);
+  strokeWeight(1);
+  line(startX, fastY, endX, fastY);
 
-    // Ball
-    const intensity = 0.5 + i * 0.25;
-    setGlow(col, 10 + i * 5);
-    stroke(col.r, col.g * intensity, col.b);
-    strokeWeight(1.5 + i * 0.3);
-    noFill();
-    circle(x, cy + yOffsets[i], 14 + i * 2);
+  // Mostrar posiciones de cuadros (espaciado amplio)
+  fill(col.r, col.g * 0.4, col.b, 50);
+  noStroke();
+  for (let i = 0; i < fastFrames; i++) {
+    const dotX = startX + (i / (fastFrames - 1)) * trackLength;
+    circle(dotX, fastY, 6);
   }
+
+  // Círculo rápido
+  setGlow(col, 15);
+  stroke(col.r, col.g, col.b);
+  strokeWeight(2);
+  noFill();
+  circle(fastX, fastY, 20);
+
+  // === SLOW track con espaciado visible ===
+  stroke(col.r, col.g, col.b, 30);
+  strokeWeight(1);
+  line(startX, slowY, endX, slowY);
+
+  // Mostrar posiciones de cuadros (espaciado estrecho)
+  fill(col.r, col.g * 0.4, col.b, 50);
+  noStroke();
+  for (let i = 0; i < slowFrames; i++) {
+    const dotX = startX + (i / (slowFrames - 1)) * trackLength;
+    circle(dotX, slowY, 4);
+  }
+
+  // Círculo lento
+  setGlow(col, 12);
+  stroke(col.r, col.g * 0.7, col.b);
+  strokeWeight(2);
+  noFill();
+  circle(slowX, slowY, 20);
+
   pop();
 }
 
@@ -618,48 +774,65 @@ function drawSolidDrawing(cx, cy) {
   const phase = frame * 0.01 + 10;
   const col = getColor(phase);
 
-  // 3D sphere illusion with depth
+  // Rotación suave para mostrar volumen
   const rotY = frame * 0.02;
 
   push();
-  setGlow(col, 10);
+
+  // === SOMBRA PROYECTADA (ancla al suelo) ===
+  const shadowY = cy + 55;
+  fill(0, col.g * 0.2, 0, 50);
+  noStroke();
+  ellipse(cx, shadowY, 70, 15);
+
+  // === ESFERA 3D CON VOLUMEN ===
+  const sphereR = 45;
+
+  setGlow(col, 15);
   noFill();
 
-  // Draw latitude lines with depth
+  // Contorno principal (más grueso = superficie frontal)
+  stroke(col.r, col.g, col.b, 255);
+  strokeWeight(2.5);
+  circle(cx, cy, sphereR * 2);
+
+  // Líneas de latitud CURVAS (demuestran que no son rectas en esfera)
   for (let i = 1; i < 6; i++) {
     const lat = (i / 6) * PI - PI / 2;
-    const y = cy + sin(lat) * 40;
-    const radiusAtLat = cos(lat) * 40;
+    const y = cy + sin(lat) * sphereR;
+    const radiusAtLat = cos(lat) * sphereR;
 
-    // Depth-based opacity
-    const depth = sin(lat);
-    const alpha = map(depth, -1, 1, 50, 200);
+    // Profundidad: centro más visible, extremos más tenues
+    const depth = abs(sin(lat));
+    const alpha = map(depth, 0, 1, 180, 50);
+    const weight = map(depth, 0, 1, 1.8, 0.5);
 
     stroke(col.r, col.g, col.b, alpha);
-    strokeWeight(map(depth, -1, 1, 0.5, 2));
+    strokeWeight(weight);
 
-    // Perspective ellipse
+    // Elipse curva (NO línea recta)
     ellipse(cx, y, radiusAtLat * 2, radiusAtLat * 0.4);
   }
 
-  // Draw longitude lines
-  for (let i = 0; i < 8; i++) {
-    const lon = (i / 8) * PI + rotY;
+  // Líneas de longitud rotando (curvas sobre la superficie)
+  for (let i = 0; i < 6; i++) {
+    const lon = (i / 6) * PI + rotY;
     const visibility = cos(lon);
-    if (visibility < 0) continue;
+    if (visibility < 0.1) continue;
 
     stroke(col.r, col.g, col.b, visibility * 150);
-    strokeWeight(visibility * 1.5);
+    strokeWeight(visibility * 1.5 + 0.3);
 
     beginShape();
-    for (let j = 0; j <= 20; j++) {
-      const lat = (j / 20) * PI - PI / 2;
-      const x = cx + cos(lat) * sin(lon) * 40;
-      const y = cy + sin(lat) * 40;
+    for (let j = 0; j <= 30; j++) {
+      const lat = (j / 30) * PI - PI / 2;
+      const x = cx + cos(lat) * sin(lon) * sphereR;
+      const y = cy + sin(lat) * sphereR;
       vertex(x, y);
     }
     endShape();
   }
+
   pop();
 }
 
@@ -667,10 +840,15 @@ function drawAppeal(cx, cy) {
   const phase = frame * 0.01 + 11;
   const col = getColor(phase);
 
-  // Charming, appealing motion
+  // Charming, appealing motion (estilo Ed)
   const wobble = sin(frame * 0.04) * 0.1;
   const breathe = 1 + sin(frame * 0.03) * 0.08;
   const bounce = abs(sin(frame * 0.05)) * 5;
+
+  // Pupilas creciendo irregular (estilo dibujo malo)
+  const leftPupilGrow = 1 + noise(frame * 0.08) * 0.6 + sin(frame * 0.07) * 0.2;
+  const rightPupilGrow =
+    1 + noise(frame * 0.08 + 100) * 0.5 + sin(frame * 0.09) * 0.25;
 
   push();
   translate(cx, cy - bounce);
@@ -682,24 +860,61 @@ function drawAppeal(cx, cy) {
   strokeWeight(2);
   noFill();
 
-  // Main body - slightly asymmetric for appeal
-  ellipse(0, 0, 45, 50);
+  // Cabeza estilo Ed - forma redonda/ovalada (más grande)
+  ellipse(0, 5, 75, 68);
 
-  // Eyes - offset for personality
-  fill(col.r, col.g, col.b, 200);
-  noStroke();
-  circle(-10, -8, 8);
-  circle(10, -5, 10);
-
-  // Smile
+  // === 14 PELOS CORTOS INDIVIDUALES ===
   stroke(col.r, col.g, col.b);
   strokeWeight(1.5);
+  // Pelos distribuidos en arco sobre la cabeza
+  line(-30, -18, -32, -26);
+  line(-26, -22, -28, -30);
+  line(-22, -26, -23, -34);
+  line(-16, -28, -17, -36);
+  line(-10, -30, -10, -38);
+  line(-4, -31, -3, -39);
+  line(2, -32, 3, -40);
+  line(8, -31, 9, -39);
+  line(14, -30, 15, -38);
+  line(20, -28, 22, -36);
+  line(25, -25, 27, -33);
+  line(29, -21, 32, -28);
+  line(32, -16, 36, -22);
+  line(-33, -13, -37, -18);
+
+  // === OJOS ESTILO ED (grandes, ovalados, estrabismo divergente) ===
+  // Esclerótica (tamaño fijo)
+  const leftEyeW = 22;
+  const leftEyeH = 26;
+  const rightEyeW = 26; // Más grande
+  const rightEyeH = 32;
+
+  // Ojo izquierdo (más pequeño)
+  fill(col.r, col.g, col.b, 200);
+  noStroke();
+  ellipse(-16, 0, leftEyeW, leftEyeH);
+
+  // Pupila izquierda - crece irregular
+  fill(5, 8, 15);
+  circle(-20, 0, 6 * leftPupilGrow);
+
+  // Ojo derecho (más grande)
+  fill(col.r, col.g, col.b, 200);
+  ellipse(16, 2, rightEyeW, rightEyeH);
+
+  // Pupila derecha - crece irregular (distinto timing)
+  fill(5, 8, 15);
+  circle(22, 2, 7 * rightPupilGrow);
+
+  // === BOCA (línea curva) ===
+  stroke(col.r, col.g, col.b);
+  strokeWeight(2);
   noFill();
-  arc(0, 8, 20, 15, 0.2, PI - 0.2);
+  arc(0, 18, 24, 12, 0.2, PI - 0.2);
 
   pop();
 
-  // Sparkles
+  // Sparkles alrededor
   push();
   for (let i = 0; i < 3; i++) {
     const sparkleAngle = frame * 0.03 + i * 2;
@@ -721,6 +936,28 @@ function drawAppeal(cx, cy) {
 function draw() {
   background(5, 8, 15);
 
+  // === HEADER (título del proyecto) ===
+  push();
+  const headerCol = getColor(frame * 0.01);
+  setGlow(headerCol, 15);
+  fill(headerCol.r, headerCol.g, headerCol.b, 255);
+  noStroke();
+  textFont("monospace");
+  textSize(14);
+  textAlign(LEFT, CENTER);
+  text("GENUARY 2026 / JAN.2", 12, 20);
+
+  textSize(11);
+  fill(headerCol.r, headerCol.g * 0.7, headerCol.b, 180);
+  text("12 PRINCIPLES OF ANIMATION", 12, 38);
+
+  // Frame counter en header
+  fill(headerCol.r, headerCol.g, headerCol.b, 120);
+  textSize(9);
+  textAlign(RIGHT, CENTER);
+  text("FRAME " + String(frame).padStart(5, "0"), width - 12, 28);
+  pop();
+
   // Draw each cell
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -728,9 +965,9 @@ function draw() {
       if (index >= 12) break;
 
       const x = col * cellWidth;
-      const y = row * cellHeight;
+      const y = row * cellHeight + headerHeight;
       const cx = x + cellWidth / 2;
-      const cy = y + cellHeight / 2 + 15;
+      const cy = y + cellHeight / 2 + 10;
 
       // Draw cell frame and title
       drawCellFrame(col, row, index);
@@ -791,20 +1028,6 @@ function draw() {
       pop();
     }
   }
-
-  // Footer
-  push();
-  const titleCol = getColor(frame * 0.01);
-  setGlow(titleCol, 12);
-  fill(titleCol.r, titleCol.g, titleCol.b, 255);
-  textFont("monospace");
-  textSize(11);
-  textAlign(LEFT, BOTTOM);
-  text("GENUARY 2026 / JAN.2 - 12 PRINCIPLES OF ANIMATION", 10, height - 8);
-
-  textAlign(RIGHT, BOTTOM);
-  text("FRAME " + String(frame).padStart(5, "0"), width - 10, height - 8);
-  pop();
 
   frame++;
 }
